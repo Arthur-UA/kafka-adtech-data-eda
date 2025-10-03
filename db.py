@@ -1,19 +1,22 @@
-'''Module to interact with localhost database expanded using Singlestore Studio'''
+'''Module to interact with SingleStore Cloud database and export query results to CSV'''
+import os
 import csv
-import pymysql
+import singlestoredb as s2
+from dotenv import load_dotenv
 
+load_dotenv(override=True)
 
-def connect(db_name, host='localhost', user='root', password='root'):
+def connect(connection_string: str):
     '''Setting up the connection with SingleStore database'''
+    conn = s2.connect(connection_string)
+    cursor = conn.cursor()
+    return conn, cursor
 
-    connection = pymysql.connect(host=host, user=user, password=password, db=db_name)
-    cursor = connection.cursor()
-
-    return connection, cursor
 
 def main():
-    '''Main function'''
-    connection, cursor = connect('adtech')
+    connection_string = os.environ['CONNECTION_STRING']
+
+    connection, cursor = connect(connection_string)
 
     query = "SELECT * FROM events"
     cursor.execute(query)
@@ -25,6 +28,7 @@ def main():
 
     cursor.close()
     connection.close()
+
 
 if __name__ == '__main__':
     main()
